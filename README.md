@@ -1,27 +1,16 @@
-Environment Setup for ICONICS Example P4 Apps:
+# P4 Wire Example Application #
 
-Download and install RTE ............
+The P4 Wire application is a basic example application that forwards all traffic from port 0 on the SmartNIC to to Virtual Function Port 0.
 
+# Installing and Testing P4 Wire with ICONICS:
 
-Testing the P4 Wire:
+1.  Follow instructions on http://iconicsp4.cloudapp.net/ to install the NFP SDK RTE, setup access to the ICONICS repository and identifying your SmartNIC
 
-1.  Install the p4wire rpm package for your specific SmartNIC:
-      http://iconicsp4.cloudapp.net/repo/p4wire/
-
-      To add repository:
-        Add the following to /etc/yum.conf at the end of the file:
-        [base-p4apps]
-        name=P4 apps
-        failovermethod=priority
-        baseurl=http://iconicsp4.cloudapp.net/repo/
-        enabled=1
-        gpgcheck=0
-
-      All the available packages can be listed with:
-        repoquery -a --repoid=base-p4apps
-
-      To install:
-        yum install nfp-sdk6-p4-config-<smartnic>-p4wire-1.00-1.noarch
+    To install package:
+      yum install nfp-sdk6-p4-config-<smartnic>-p4wire-<version>.noarch
+	  
+	List all the available packages in the repo:
+	  repoquery -qa --repoid=iconics
 
 2.  The test script will be installed to:
       /opt/nfp_pif/etc/smartnic-configs/<smartnic>-p4wire/
