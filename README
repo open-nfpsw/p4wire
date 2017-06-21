@@ -1,40 +1,53 @@
 # P4 Wire Example Application #
 
-The P4 Wire application is a basic example application that forwards all traffic from port 0 on the SmartNIC to to Virtual Function Port 0.
+The P4 Wire application is a basic example application. There is 2 variants of this project:
+1. port_to_vf - Forwards traffic from vf_0_0 to p0 and vice versa. Please note this project requires hardware SR-IOV support.
+2. port_to_port - Forwards traffic from p0 to p4 and vice versa.
 
 # Installing and Testing P4 Wire with ICONICS:
 
 1.  Follow instructions on http://iconicsp4.cloudapp.net/ to install the NFP SDK RTE, setup access to the ICONICS repository and identifying your SmartNIC
 
-    To install package:
+    To install port_to_vf package:
       yum install nfp-sdk6-p4-config-<smartnic>-p4wire-<version>.noarch
+	To install port_to_port package:
+	  yum install nfp-sdk6-p4-config-<smartnic>-p4wire_port_to_port-<version>.noarch
 	  
 	List all the available packages in the repo:
 	  repoquery -qa --repoid=iconics
 
 2.  The test script will be installed to:
       /opt/nfp_pif/etc/smartnic-configs/<smartnic>-p4wire/
+		or
+	  /opt/nfp_pif/etc/smartnic-configs/<smartnic>-p4wire_port_to_port/
+	  
+3.  Wait (around 2 minutes) for firmware to load onto the SmartNIC:
+      Use ifconfig to see when VFs have loaded before trying to run tests or look in /var/log/nfp-sdk6-rte.log
 
-3.  Wait for firmware to load onto the SmartNIC:
-      Use ifconfig to see when VFs have loaded before trying to run tests.
-
-4.  Run the test script on the host where your SmartNIC is installed:
-      ./p4wire-test.sh <port>
+4.  Run the test script 
+	For vf_to_port on the host where your SmartNIC and traditional NIC is installed:
+      ./p4wire-test.sh <port> 
+	  Example for the port_to_vf1 setup below:
       ./p4wire-test.sh p2p1
+	  
+	For port_to_port on the host where your traditional NIC is installed:
+      ./p4wire-test.sh <port1> <port2> 
+	  Example for the port_to_port setup below:
+      ./p4wire-test.sh p2p1 p2p2
 
       Make sure you have downloaded the .pcap files provided in this repo
       Make sure you have tcpreplay installed on your host:
         yum install tcpreplay
       The .pcap files must be in the same directory as the test script.
 
-5.  Setup:
+5.  Setup for port_to_vf:
                       Host
 _______________________________________________________
         vf0
    ______|_______           ______________
-  |   SmartNIC   |         |   DumbNIC    |
+  |   SmartNIC   |         |TraditionalNIC|
   |            p0|---------|p2p1<port>    |
-  |   Firewall   |         |              |
+  |    P4WIRE    |         |              |
   |              |         |              |
   |______________|         |______________|
 
@@ -43,3 +56,20 @@ _______________________________________________________
   The test script will do the following:
     - Send a packet from <port> to p0: Forward to vf0_0
     - Send a packet to vf0_0: Forward to p0
+	
+Setup for port_to_port:
+                      Host
+_______________________________________________________
+        
+   _____________           ______________
+  |   SmartNIC   |         |TraditionalNIC|
+  |            p0|---------|p2p1<port1>   |
+  |   P4WIRE     |         |              |
+  |            p4|---------|p2p2<port2>   |
+  |______________|         |______________|
+
+_______________________________________________________
+
+  The test script will do the following:
+    - Send a packet from <port1> to p0: Forward to p4 and receive on p2p2
+    - Send a packet from <port2> to p4: Forward to p0 and receive on p2p10
